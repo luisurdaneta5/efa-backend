@@ -1,8 +1,10 @@
 const { response } = require("express");
 const { v4: uuidv4 } = require("uuid");
-const bycrypt = require("bcrypt");
+const bcrypt = require("bcrypt");
 const User = require("../models/user");
 const { generarJWT } = require("../helpers/jwt");
+const Balance = require("../models/balance");
+const Avatar = require("../models/avatar");
 
 const createUser = async (req, res = response) => {
 	const body = req.body;
@@ -17,11 +19,11 @@ const createUser = async (req, res = response) => {
 		if (user) {
 			res.status(404).json({
 				ok: false,
-				msg: "Disculpe, ya existe un usuario con ese correo",
+				msg: "email",
 			});
 		} else {
-			const salt = bycrypt.genSaltSync();
-			const hash = bycrypt.hashSync(body.password, salt);
+			const salt = bcrypt.genSaltSync();
+			const hash = bcrypt.hashSync(body.password, salt);
 
 			const data = {
 				...body,
@@ -32,14 +34,33 @@ const createUser = async (req, res = response) => {
 			user = new User(data);
 			user.save();
 
+			const balanceData = {
+				id: uuidv4(),
+				userId: user.id,
+				amount: 0,
+			};
+
+			const balance = new Balance(balanceData);
+			balance.save();
+
+			const avatarData = {
+				id: uuidv4(),
+				userId: user.id,
+				avatarUrl: " ",
+			};
+
+			const avatar = new Avatar(avatarData);
+			avatar.save();
+
 			res.status(200).json({
 				ok: true,
+				msg: "Usuario creado exitosamente",
 				user,
 			});
 		}
 	} catch (error) {
 		res.status(500).json({
-			ok: true,
+			ok: false,
 			msg: "Ha ocurrido un error inesperado",
 		});
 		console.log(error);
@@ -54,13 +75,18 @@ const setLogin = async (req, res = response) => {
 			where: {
 				email: body.email,
 			},
+			include: [
+				{
+					model: Avatar,
+					attributes: {
+						exclude: ["userId", "id", "createdAt", "updatedAt"],
+					},
+				},
+			],
 		});
 
 		if (user) {
-			const validPassword = bycrypt.compareSync(
-				body.password,
-				user.password
-			);
+			const validPassword = bcrypt.compareSync(body.password, user.password);
 
 			if (!validPassword) {
 				res.status(400).json({
@@ -68,13 +94,16 @@ const setLogin = async (req, res = response) => {
 					msg: "Contaseña incorrecta",
 				});
 			} else {
-				const token = await generarJWT(user.id, user.name, user.type);
+				const token = await generarJWT(user.id, user.type);
 
 				res.status(200).json({
 					ok: true,
 					uid: user.id,
 					name: user.name,
 					type: user.type,
+					email: user.email,
+					phone: user.phone,
+					avatar: user.avatar.avatarUrl,
 					token,
 				});
 			}
@@ -94,13 +123,34 @@ const setLogin = async (req, res = response) => {
 };
 
 const renewToken = async (req, res = response) => {
-	const { uid, name, type } = req.body;
+	const uid = req.uid;
+	const type = req.type;
 
-	const token = await generarJWT(uid, name, type);
+	const user = await User.findOne({
+		where: {
+			id: uid,
+		},
+		include: [
+			{
+				model: Avatar,
+				attributes: {
+					exclude: ["userId", "id", "createdAt", "updatedAt"],
+				},
+			},
+		],
+	});
+
+	const token = await generarJWT(uid, type);
 
 	res.status(200).json({
 		ok: true,
+		uid,
+		type,
 		token,
+		name: user.name,
+		email: user.email,
+		phone: user.phone,
+		avatar: user.avatar.avatarUrl,
 	});
 };
 

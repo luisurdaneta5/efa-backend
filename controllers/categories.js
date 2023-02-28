@@ -1,9 +1,15 @@
 const { response } = require("express");
 const Category = require("../models/category");
 const { v4: uuid } = require("uuid");
+const { Op } = require("sequelize");
+const fs = require("fs");
+const path = require("path");
+const { sequelize } = require("../models/connectionDb");
 
 const createCategory = async (req, res = response) => {
 	const body = req.body;
+
+	const file = req.file;
 
 	try {
 		let category = await Category.findOne({
@@ -13,18 +19,27 @@ const createCategory = async (req, res = response) => {
 		});
 
 		if (!category) {
-			const data = {
-				...body,
-				id: uuid(),
-			};
+			if (file) {
+				const data = {
+					...body,
+					id: uuid(),
+					icon: process.env.URL_FILE + "/" + file.destination + "/" + file.filename,
+					status: 1,
+				};
 
-			category = new Category(data);
-			category.save();
+				category = new Category(data);
+				category.save();
 
-			res.status(200).json({
-				ok: true,
-				msg: "Categoria creada exitosamente",
-			});
+				res.status(200).json({
+					ok: true,
+					msg: "Categoria creada exitosamente",
+				});
+			} else {
+				res.status(500).json({
+					ok: false,
+					msg: "Icono no enviado",
+				});
+			}
 		} else {
 			res.status(500).json({
 				ok: false,
@@ -92,6 +107,10 @@ const deleteCategory = async (req, res = response) => {
 			},
 		});
 
+		const file = path.basename(category.icon);
+
+		fs.unlinkSync("uploads/icons/categories/" + file);
+
 		category.destroy();
 
 		res.status(200).json({
@@ -145,9 +164,69 @@ const setStatusCategory = async (req, res = response) => {
 	}
 };
 
+const getCategories = async (req, res = response) => {
+	const { page, size, query } = req.query;
+
+	try {
+		const term = query.toLowerCase();
+		const categories = await Category.findAndCountAll({
+			attributes: {
+				exclude: ["createdAt", "updatedAt"],
+			},
+			limit: parseInt(size),
+			offset: parseInt(page * size),
+			where: {
+				[Op.or]: [
+					{
+						name: {
+							[Op.like]: "%" + term + "%",
+						},
+					},
+				],
+			},
+		});
+
+		res.status(200).json({
+			ok: true,
+			categories,
+		});
+	} catch (error) {
+		console.log(error);
+		res.status(500).json({
+			ok: true,
+			msg: "Ha ocurrido un error inesperado",
+		});
+	}
+};
+
+const getCategoriesForHome = async (req, res = response) => {
+	try {
+		const categories = await Category.findAll({
+			attributes: {
+				exclude: ["status", "icon", "createdAt", "updatedAt"],
+			},
+			order: sequelize.random(),
+			limit: 6,
+		});
+
+		res.status(200).json({
+			ok: true,
+			categories,
+		});
+	} catch (error) {
+		console.log(error);
+		res.status(500).json({
+			ok: true,
+			msg: "Ha ocurrido un error inesperado",
+		});
+	}
+};
+
 module.exports = {
 	createCategory,
 	updateCategory,
 	deleteCategory,
 	setStatusCategory,
+	getCategories,
+	getCategoriesForHome,
 };

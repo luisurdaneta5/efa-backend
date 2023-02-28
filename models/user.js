@@ -1,5 +1,8 @@
 const { DataTypes } = require("sequelize");
+const Avatar = require("./avatar");
+const Balance = require("./balance");
 const db = require("./connectionDb");
+const Favorite = require("./favorites");
 
 const User = db.sequelize.define("users", {
 	id: {
@@ -21,6 +24,10 @@ const User = db.sequelize.define("users", {
 	type: {
 		type: DataTypes.INTEGER,
 	},
+});
+
+User.hasMany(Favorite, {
+	foreignKey: "userId",
 });
 
 module.exports = User;

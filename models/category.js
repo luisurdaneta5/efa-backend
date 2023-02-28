@@ -6,6 +6,9 @@ const Category = db.sequelize.define("categories", {
 		type: DataTypes.STRING(256),
 		primaryKey: true,
 	},
+	icon: {
+		type: DataTypes.TEXT,
+	},
 	name: {
 		type: DataTypes.STRING(256),
 	},
