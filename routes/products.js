@@ -1,5 +1,15 @@
 const express = require("express");
-const { getCategories, createProduct, getProducts, setStatusProduct, productUpdate, deleteProduct, getProductsWithDiscount, getProductsHome } = require("../controllers/products");
+const {
+	getCategories,
+	createProduct,
+	getProducts,
+	setStatusProduct,
+	productUpdate,
+	deleteProduct,
+	getProductsWithDiscount,
+	getProductsHome,
+	getProductsWithOutStock,
+} = require("../controllers/products");
 const uploadFile = require("../middlewares/uploadFile");
 const { validarJWT } = require("../middlewares/validarJWT");
 
@@ -20,5 +30,7 @@ router.delete("/delete", deleteProduct);
 router.get("/discount", getProductsWithDiscount);
 
 router.get("/home", getProductsHome);
+
+router.get("/outstock", getProductsWithOutStock);
 
 module.exports = router;

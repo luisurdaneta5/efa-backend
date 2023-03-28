@@ -384,6 +384,23 @@ const changeAvatar = async (req, res = response) => {
 	}
 };
 
+const usersCount = async (req, res = response) => {
+	try {
+		const users = await User.count();
+
+		res.status(200).json({
+			ok: true,
+			users,
+		});
+	} catch (error) {
+		console.log(error);
+		res.status(500).json({
+			ok: true,
+			msg: "Ha ocurrido un error inesperado",
+		});
+	}
+};
+
 module.exports = {
 	updateUser,
 	getUsers,
@@ -392,4 +409,5 @@ module.exports = {
 	getUser,
 	changePassword,
 	changeAvatar,
+	usersCount,
 };

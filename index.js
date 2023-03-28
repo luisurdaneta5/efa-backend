@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const { sequelize } = require("./models/connectionDb");
 const path = require("path");
+const cron = require("node-cron");
 require("./models/asociations");
 require("dotenv").config();
 
@@ -40,6 +41,8 @@ app.use("/api/shoppingcarts", require("./routes/shoppingcarts"));
 app.use("/api/orders", require("./routes/orders"));
 app.use("/api/reviews", require("./routes/reviews"));
 app.use("/api/records", require("./routes/records"));
+app.use("/api/sales", require("./routes/sales"));
+app.use("/api/visits", require("./routes/visits"));
 
 //Servidor
 app.listen(process.env.PORT, () => {
@@ -53,4 +56,10 @@ app.listen(process.env.PORT, () => {
 		.catch((err) => {
 			console.log("No se ha podido conectar a la base de datos:", err);
 		});
+});
+
+//Cron Jobs
+cron.schedule("0 0 * * *", async () => {
+	const { deleteVisits } = require("./controllers/visits");
+	await deleteVisits();
 });

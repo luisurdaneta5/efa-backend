@@ -8,11 +8,11 @@ const ShoppingCart = require("../models/shoppingcart");
 const moment = require("moment");
 const Sale = require("../models/sales");
 const Review = require("../models/reviews");
+const User = require("../models/user");
 
 const createOrder = async (req, res = response) => {
 	const body = req.body;
 
-	console.log(body);
 	try {
 		const balance = await Balance.findOne({
 			where: {
@@ -38,6 +38,7 @@ const createOrder = async (req, res = response) => {
 				address: body.address,
 				note: body.note,
 				total: body.amount,
+				sale_date: Date.now(),
 				discount: body.coupon == null ? 0 : body.coupon,
 			};
 			const order = new Order(data);
@@ -84,7 +85,7 @@ const createOrder = async (req, res = response) => {
 					found.update(data);
 				}
 
-				console.log(moment(order.createdAt).format("YYYY-MM-DD"));
+				// console.log(moment(order.createdAt).format("YYYY-MM-DD"));
 				const sale = await Sale.findOne({
 					where: {
 						productId: product.id,
@@ -215,29 +216,271 @@ const getOrderById = async (req, res = response) => {
 	const body = req.query;
 
 	try {
-		const order = await Order.findOne({
-			where: {
-				id: body.id,
-			},
+		if (!body.uid) {
+			const order = await Order.findOne({
+				where: {
+					id: body.id,
+				},
+				attributes: {
+					exclude: ["id", "userId", "updatedAt", "createdAt", "delivary_date"],
+				},
+				include: [
+					{
+						model: User,
+						attributes: {
+							exclude: ["id", "password", "type", "createdAt", "updatedAt"],
+						},
+					},
+				],
+			});
+
+			res.status(200).json({
+				ok: true,
+				order,
+			});
+		} else {
+			const order = await Order.findOne({
+				where: {
+					id: body.id,
+				},
+				attributes: {
+					exclude: ["id", "name", "dni", "email", "phone", "address", "userId", "note", "updatedAt"],
+				},
+			});
+
+			const reviews = await Review.findAll({
+				where: {
+					orderId: body.id,
+					userId: body.uid,
+				},
+				attributes: {
+					exclude: ["id", "userId", "orderId", "comment", "status", "createdAt", "updatedAt"],
+				},
+			});
+
+			res.status(200).json({
+				ok: true,
+				order,
+				reviews,
+			});
+		}
+	} catch (error) {
+		res.status(500).json({
+			ok: false,
+			msg: "Ha ocurrido un error inesperado",
+		});
+		console.log(error);
+	}
+};
+
+const getOrders = async (req, res = response) => {
+	let amount = 0;
+	try {
+		const orders = await Order.findAndCountAll({
 			attributes: {
-				exclude: ["id", "name", "dni", "email", "phone", "address", "userId", "note", "updatedAt"],
+				exclude: ["id", "name", "dni", "email", "phone", "address", "userId", "note", "updatedAt", "products", "delivery_date", "discount", "createdAt", "status"],
 			},
 		});
 
-		const reviews = await Review.findAll({
-			where: {
-				orderId: body.id,
-				userId: body.uid,
-			},
-			attributes: {
-				exclude: ["id", "userId", "orderId", "comment", "status", "createdAt", "updatedAt"],
-			},
+		orders.rows.forEach((order) => {
+			amount = amount + Number(order.total);
 		});
 
 		res.status(200).json({
 			ok: true,
-			order,
-			reviews,
+			cant: orders.count,
+			amount,
+		});
+	} catch (error) {
+		res.status(500).json({
+			ok: false,
+			msg: "Ha ocurrido un error inesperado",
+		});
+		console.log(error);
+	}
+};
+
+const getOrdersPending = async (req, res = response) => {
+	const { page, size, query } = req.query;
+	let status = 0;
+
+	const term = query.trim().toLowerCase();
+
+	if (term == "pendiente") {
+		status = 0;
+	} else if (term == "procesando") {
+		status = 1;
+	} else if (term == "empacado") {
+		status = 2;
+	}
+
+	const num = parseFloat(term);
+
+	try {
+		const orders = await Order.findAndCountAll({
+			where: {
+				status: 0,
+				[Op.or]: [
+					{
+						id: {
+							[Op.like]: "%" + term + "%",
+						},
+					},
+					{
+						sale_date: {
+							[Op.like]: "%" + term + "%",
+						},
+					},
+					{
+						total: {
+							[Op.like]: "%" + num + "%",
+						},
+					},
+					{
+						status: {
+							[Op.like]: "%" + status + "%",
+						},
+					},
+				], //status  0 = pendiente, 1 = procesando, 2 = empacado y 3 = entregado,
+			},
+			attributes: {
+				exclude: ["userId", "products", "name", "dni", "email", "phone", "address", "note", "updatedAt", "delivery_date", "discount"],
+			},
+			include: [
+				{
+					model: User,
+					attributes: {
+						exclude: ["id", "email", "createdAt", "updatedAt", "phone", "password", "type"],
+					},
+				},
+			],
+			limit: parseInt(size),
+			offset: parseInt(page * size),
+		});
+
+		res.status(200).json({
+			ok: true,
+			orders,
+		});
+	} catch (error) {
+		res.status(500).json({
+			ok: false,
+			msg: "Ha ocurrido un error inesperado",
+		});
+		console.log(error);
+	}
+};
+
+const getOrdersComplete = async (req, res = response) => {
+	const { page, size, query } = req.query;
+
+	const term = query.trim().toLowerCase();
+
+	const num = parseFloat(term);
+
+	try {
+		const orders = await Order.findAndCountAll({
+			where: {
+				status: 3,
+				[Op.or]: [
+					{
+						id: {
+							[Op.like]: "%" + term + "%",
+						},
+					},
+					{
+						sale_date: {
+							[Op.like]: "%" + term + "%",
+						},
+					},
+					{
+						total: {
+							[Op.like]: "%" + num + "%",
+						},
+					},
+				], //status  0 = pendiente, 1 = procesando, 2 = empacado y 3 = entregado,
+			},
+			attributes: {
+				exclude: ["userId", "products", "name", "dni", "email", "phone", "address", "note", "updatedAt", "delivery_date", "discount"],
+			},
+			include: [
+				{
+					model: User,
+					attributes: {
+						exclude: ["id", "email", "createdAt", "updatedAt", "phone", "password", "type"],
+					},
+				},
+			],
+			limit: parseInt(size),
+			offset: parseInt(page * size),
+		});
+
+		res.status(200).json({
+			ok: true,
+			orders,
+		});
+	} catch (error) {
+		res.status(500).json({
+			ok: false,
+			msg: "Ha ocurrido un error inesperado",
+		});
+		console.log(error);
+	}
+};
+
+const changeStatusOrder = async (req, res = response) => {
+	const { body } = req;
+
+	try {
+		const order = await Order.findOne({
+			where: {
+				id: body.id,
+			},
+		});
+
+		order.update({
+			status: body.status,
+		});
+
+		res.status(200).json({
+			ok: true,
+			msg: "El estado de la orden ha sido actualizado",
+		});
+	} catch (error) {
+		res.status(500).json({
+			ok: false,
+			msg: "Ha ocurrido un error inesperado",
+		});
+		console.log(error);
+	}
+};
+
+const getOrdersForDashboard = async (req, res = response) => {
+	try {
+		const orders = await Order.findAll({
+			where: {
+				status: {
+					[Op.not]: 3,
+				},
+			},
+			limit: 5,
+			order: [["sale_date", "DESC"]],
+			attributes: {
+				exclude: ["userId", "products", "name", "dni", "email", "phone", "address", "note", "updatedAt", "delivery_date", "discount", "sale_date"],
+			},
+			include: [
+				{
+					model: User,
+					attributes: {
+						exclude: ["id", "email", "createdAt", "updatedAt", "phone", "password", "type"],
+					},
+				},
+			],
+		});
+
+		res.status(200).json({
+			ok: true,
+			orders,
 		});
 	} catch (error) {
 		res.status(500).json({
@@ -252,4 +495,9 @@ module.exports = {
 	createOrder,
 	getOrdersUser,
 	getOrderById,
+	getOrdersPending,
+	getOrders,
+	getOrdersComplete,
+	changeStatusOrder,
+	getOrdersForDashboard,
 };

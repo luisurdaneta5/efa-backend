@@ -26,8 +26,4 @@ const User = db.sequelize.define("users", {
 	},
 });
 
-User.hasMany(Favorite, {
-	foreignKey: "userId",
-});
-
 module.exports = User;

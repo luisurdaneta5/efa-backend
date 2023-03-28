@@ -355,6 +355,31 @@ const getProductsHome = async (req, res = response) => {
 	}
 };
 
+const getProductsWithOutStock = async (req, res = response) => {
+	try {
+		const products = await Product.findAll({
+			where: {
+				stock: 0,
+			},
+			attributes: {
+				exclude: ["status", "createdAt", "updatedAt", "cost", "profit", "discount", "stock", "description", "brand", "category", "img"],
+			},
+			limit: 5,
+		});
+
+		res.status(200).json({
+			ok: true,
+			products,
+		});
+	} catch (error) {
+		console.log(error);
+		res.status(500).json({
+			ok: false,
+			msg: "Ha ocurrido un error inesperado favor intente mas tarde",
+		});
+	}
+};
+
 module.exports = {
 	getCategories,
 	createProduct,
@@ -364,4 +389,5 @@ module.exports = {
 	deleteProduct,
 	getProductsWithDiscount,
 	getProductsHome,
+	getProductsWithOutStock,
 };

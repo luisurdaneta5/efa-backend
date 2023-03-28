@@ -33,6 +33,9 @@ const Order = db.sequelize.define("orders", {
 	note: {
 		type: DataTypes.TEXT,
 	},
+	sale_date: {
+		type: DataTypes.STRING(),
+	},
 	delivery_date: {
 		type: DataTypes.DATE,
 	},

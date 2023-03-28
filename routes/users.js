@@ -1,5 +1,5 @@
 const express = require("express");
-const { updateUser, getUsers, deleteUser, updateProfile, getUser, changePassword, changeAvatar } = require("../controllers/users");
+const { updateUser, getUsers, deleteUser, updateProfile, getUser, changePassword, changeAvatar, usersCount } = require("../controllers/users");
 const uploadFile = require("../middlewares/uploadFile");
 const { validarJWT } = require("../middlewares/validarJWT");
 
@@ -18,5 +18,7 @@ router.get("/get/single", validarJWT, getUser);
 router.put("/change_password", validarJWT, changePassword);
 
 router.put("/change_avatar", validarJWT, uploadFile("avatar", "uploads/avatars"), changeAvatar);
+
+router.get("/count", validarJWT, usersCount);
 
 module.exports = router;

@@ -6,6 +6,8 @@ const Record = require("./record");
 const Review = require("./reviews");
 const ShoppingCart = require("./shoppingcart");
 const User = require("./user");
+const Sale = require("./sales");
+const Order = require("./order");
 
 Product.hasMany(Favorite, {
 	foreignKey: "productId",
@@ -57,4 +59,28 @@ User.hasOne(Review, {
 
 Review.belongsTo(User, {
 	foreignKey: "userId",
+});
+
+Sale.belongsTo(Product, {
+	foreignKey: "productId",
+});
+
+Product.hasOne(Sale, {
+	foreignKey: "productId",
+});
+
+User.hasMany(Order, {
+	foreignKey: "userId",
+});
+
+Order.belongsTo(User, {
+	foreignKey: "userId",
+});
+
+Review.belongsTo(Product, {
+	foreignKey: "productId",
+});
+
+Product.hasMany(Review, {
+	foreignKey: "productId",
 });

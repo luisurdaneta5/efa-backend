@@ -1,20 +1,14 @@
 const { DataTypes } = require("sequelize");
 const db = require("./connectionDb");
 
-const Sale = db.sequelize.define("sales", {
+const Visit = db.sequelize.define("visits", {
 	id: {
 		type: DataTypes.STRING(256),
 		primaryKey: true,
 	},
-	productId: {
+	ip: {
 		type: DataTypes.STRING(256),
-	},
-	cant: {
-		type: DataTypes.INTEGER(),
-	},
-	sale_date: {
-		type: DataTypes.STRING(100),
 	},
 });
 
-module.exports = Sale;
+module.exports = Visit;
