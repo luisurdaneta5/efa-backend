@@ -18,8 +18,7 @@ const uploadFile = (term, destination) => {
 		fileFilter: (req, file, cb) => {
 			const acceptedExtensions = [".jpg", ".png"];
 			const fileExtension = path.extname(file.originalname);
-			const isAnAcceptedExtension =
-				acceptedExtensions.includes(fileExtension);
+			const isAnAcceptedExtension = acceptedExtensions.includes(fileExtension);
 
 			if (isAnAcceptedExtension) {
 				cb(null, true);

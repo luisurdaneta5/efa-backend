@@ -1,6 +1,7 @@
 const { response } = require("express");
 const { v4: uuidv4 } = require("uuid");
 const Visit = require("../models/visits");
+const userRegisterMail = require("../mails/userRegisterMail");
 
 const setVisit = async (req, res = response) => {
 	const body = req.body;
@@ -62,4 +63,17 @@ const deleteVisits = async (req, res = response) => {
 	}
 };
 
-module.exports = { setVisit, getVisits, deleteVisits };
+const sendEmail = async (req, res = response) => {
+	try {
+		userRegisterMail();
+
+		res.status(200).json({
+			ok: true,
+			msg: "Email enviado",
+		});
+	} catch (error) {
+		console.log(error);
+	}
+};
+
+module.exports = { setVisit, getVisits, deleteVisits, sendEmail };

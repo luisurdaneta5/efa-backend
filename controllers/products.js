@@ -6,10 +6,12 @@ const { Op } = require("sequelize");
 const fs = require("fs");
 const path = require("path");
 const { sequelize } = require("../models/connectionDb");
-const Favorite = require("../models/favorites");
 const Review = require("../models/reviews");
 const User = require("../models/user");
 const Avatar = require("../models/avatar");
+// const uploadImageKit = require("../helpers/uploadImageKit");
+const tinify = require("tinify");
+tinify.key = "P66zZLzs241NQTVlcf4vGV8vgzfp3hkP";
 
 const getCategories = async (req, res = response) => {
 	try {
@@ -44,6 +46,12 @@ const createProduct = async (req, res = response) => {
 			img: process.env.URL_FILE + "/" + file.destination + "/" + file.filename,
 			description: body.description === undefined ? " " : body.description,
 		};
+
+		//ImageKit
+		// uploadImageKit(file);
+
+		const source = tinify.fromFile(file.path);
+		source.toFile(file.path);
 
 		const product = new Product(data);
 		product.save();

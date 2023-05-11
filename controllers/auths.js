@@ -5,6 +5,7 @@ const User = require("../models/user");
 const { generarJWT } = require("../helpers/jwt");
 const Balance = require("../models/balance");
 const Avatar = require("../models/avatar");
+const userRegisterMail = require("../mails/userRegisterMail");
 
 const createUser = async (req, res = response) => {
 	const body = req.body;
@@ -19,7 +20,7 @@ const createUser = async (req, res = response) => {
 		if (user) {
 			res.status(404).json({
 				ok: false,
-				msg: "email",
+				msg: "El correo ya está registrado",
 			});
 		} else {
 			const salt = bcrypt.genSaltSync();
@@ -51,6 +52,8 @@ const createUser = async (req, res = response) => {
 
 			const avatar = new Avatar(avatarData);
 			avatar.save();
+
+			userRegisterMail(body.email);
 
 			res.status(200).json({
 				ok: true,
