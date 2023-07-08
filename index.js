@@ -46,20 +46,20 @@ app.use("/api/visits", require("./routes/visits"));
 
 //Servidor
 app.listen(process.env.PORT, () => {
-	console.log(`Servidor corriendo en puerto ${process.env.PORT}`);
+  console.log(`Servidor corriendo en puerto ${process.env.PORT}`);
 
-	sequelize
-		.authenticate()
-		.then(() => {
-			console.log("La conexión a la base de datos se ha establecido correctamente");
-		})
-		.catch((err) => {
-			console.log("No se ha podido conectar a la base de datos:", err);
-		});
+  sequelize
+    .authenticate()
+    .then(() => {
+      console.log("La conexión a la base de datos se ha establecido correctamente");
+    })
+    .catch((err) => {
+      console.log("No se ha podido conectar a la base de datos:", err);
+    });
 });
 
 //Cron Jobs
 cron.schedule("0 0 * * *", async () => {
-	const { deleteVisits } = require("./controllers/visits");
-	await deleteVisits();
+  const { deleteVisits } = require("./controllers/visits");
+  await deleteVisits();
 });
