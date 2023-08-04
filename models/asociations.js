@@ -8,79 +8,88 @@ const ShoppingCart = require("./shoppingcart");
 const User = require("./user");
 const Sale = require("./sales");
 const Order = require("./order");
+const Refill = require("./refill");
 
 Product.hasMany(Favorite, {
-	foreignKey: "productId",
+    foreignKey: "productId",
 });
 
 Favorite.belongsTo(Product, {
-	foreignKey: "productId",
+    foreignKey: "productId",
 });
 
 User.hasOne(Avatar, {
-	foreignKey: "userId",
+    foreignKey: "userId",
 });
 
 Avatar.belongsTo(User, {
-	foreignKey: "userId",
+    foreignKey: "userId",
 });
 
 User.hasOne(Balance, {
-	foreignKey: "userId",
+    foreignKey: "userId",
 });
 
 Balance.belongsTo(User, {
-	foreignKey: "userId",
+    foreignKey: "userId",
 });
 
 ShoppingCart.belongsTo(Product, {
-	foreignKey: "productId",
+    foreignKey: "productId",
 });
 
 Product.hasMany(ShoppingCart, {
-	foreignKey: "productId",
+    foreignKey: "productId",
 });
 
 Product.hasMany(Review, {
-	foreignKey: "productId",
+    foreignKey: "productId",
 });
 
 Product.hasOne(Record, {
-	foreignKey: "productId",
+    foreignKey: "productId",
 });
 
 Record.belongsTo(Product, {
-	foreignKey: "productId",
+    foreignKey: "productId",
 });
 
 User.hasOne(Review, {
-	foreignKey: "userId",
+    foreignKey: "userId",
 });
 
 Review.belongsTo(User, {
-	foreignKey: "userId",
+    foreignKey: "userId",
 });
 
 Sale.belongsTo(Product, {
-	foreignKey: "productId",
+    foreignKey: "productId",
 });
 
 Product.hasOne(Sale, {
-	foreignKey: "productId",
+    foreignKey: "productId",
 });
 
 User.hasMany(Order, {
-	foreignKey: "userId",
+    foreignKey: "userId",
 });
 
 Order.belongsTo(User, {
-	foreignKey: "userId",
+    foreignKey: "userId",
 });
 
 Review.belongsTo(Product, {
-	foreignKey: "productId",
+    foreignKey: "productId",
 });
 
 Product.hasMany(Review, {
-	foreignKey: "productId",
+    foreignKey: "productId",
+});
+
+User.hasMany(Refill, {
+    foreignKey: "userId",
+});
+
+Refill.belongsTo(User, {
+    foreignKey: "userId",
 });

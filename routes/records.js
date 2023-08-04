@@ -6,6 +6,6 @@ const router = express.Router();
 
 router.put("/set", validarJWT, setRecord);
 
-router.get("/get", getRecord);
+router.get("/get", validarJWT, getRecord);
 
 module.exports = router;

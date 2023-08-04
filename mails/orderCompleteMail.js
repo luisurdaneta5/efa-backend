@@ -1,23 +1,23 @@
 const nodeMailer = require("nodemailer");
 
-const userRegisterMail = async (email) => {
-  const config = {
-    host: process.env.SMTP_HOST,
-    port: process.env.SMTP_PORT,
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS,
-    },
-  };
+const orderCompleteMail = async (email, order) => {
+    const config = {
+        host: process.env.SMTP_HOST,
+        port: process.env.SMTP_PORT,
+        auth: {
+            user: process.env.SMTP_USER,
+            pass: process.env.SMTP_PASS,
+        },
+    };
 
-  const transporter = nodeMailer.createTransport(config);
+    const transporter = nodeMailer.createTransport(config);
 
-  let info = await transporter.sendMail({
-    from: '"EFA SISTEMAS" <no-reply@efasistemas.com>', // sender address
-    to: email, // list of receivers
-    subject: "Gracias por preferirnos!!", // Subject line
-    // text: "Hello world?", // plain text body
-    html: `<!DOCTYPE html>
+    let info = await transporter.sendMail({
+        from: '"EFA SISTEMAS" <no-reply@efasistemas.com>', // sender address
+        to: email, // list of receivers
+        subject: "Su orden de compra ha sido aprobada!!", // Subject line
+        // text: "Hello world?", // plain text body
+        html: `<!DOCTYPE html>
                 <html lang="en">
                     <head>
                         <meta charset="UTF-8" />
@@ -63,15 +63,18 @@ const userRegisterMail = async (email) => {
                                         </tr>
                                         <tr>
                                             <td style="padding: 8%; font-family: Roboto, Helvetica, Arial, sans-serif">
-                                                Estimado usuario, le queremos dar la bienvenida a nuestra plataforma de compras online, donde podrá encontrar una gran variedad de productos de
-                                                tecnología, camara de seguridad y computación.
-                                                <p>Para poder ingresar a la plataforma, deberá validar su correo electronico mediante el siguiente enlace:</p>
+                                                <strong>Gracias por su compra!</strong>
+                                                <p>Su orden de compra N°<strong>${order.id.substr(0, 8).toUpperCase()}</strong> ha sido aprobada.</p>
+                                                <p>
+                                                    Le agradecemos siempre la confianza en nosotros y le invitamos a ingresar a nuestro sistema en la opcion ordenes para darle seguimiento al
+                                                    status de la compra
+                                                </p>
 
-                                               <div style="margin-top: 50px">
+                                                <div style="margin-top: 50px">
                                                     <div class="center">
-                                                        <a href="https://efasistemas.com" target="_blank" style="color: #fff" class="button">IR A SITIO WEB</a>
+                                                        <a href="http://efasistema.com" target="_blank" style="color: #fff" class="button">IR A SITIO WEB</a>
                                                     </div>
-                                               </div>
+                                                </div>
                                             </td>
                                         </tr>
                                         <tr>
@@ -100,34 +103,34 @@ const userRegisterMail = async (email) => {
                         </div>
                     </body>
                 </html>`, // html body
-    attachments: [
-      {
-        filename: "fb.png",
-        path: "./public/images/fb.png",
-        cid: "fb",
-      },
-      // {
-      // 	filename: "tw.png",
-      // 	path: "./public/images/tw.png",
-      // 	cid: "tw",
-      // },
-      {
-        filename: "inst.png",
-        path: "./public/images/inst.png",
-        cid: "inst",
-      },
-      {
-        filename: "ws.png",
-        path: "./public/images/ws.png",
-        cid: "ws",
-      },
-      {
-        filename: "logo.png",
-        path: "./public/images/logo.png",
-        cid: "logo",
-      },
-    ],
-  });
+        attachments: [
+            {
+                filename: "fb.png",
+                path: "./public/images/fb.png",
+                cid: "fb",
+            },
+            // {
+            // 	filename: "tw.png",
+            // 	path: "./public/images/tw.png",
+            // 	cid: "tw",
+            // },
+            {
+                filename: "inst.png",
+                path: "./public/images/inst.png",
+                cid: "inst",
+            },
+            {
+                filename: "ws.png",
+                path: "./public/images/ws.png",
+                cid: "ws",
+            },
+            {
+                filename: "logo.png",
+                path: "./public/images/logo.png",
+                cid: "logo",
+            },
+        ],
+    });
 };
 
-module.exports = userRegisterMail;
+module.exports = orderCompleteMail;

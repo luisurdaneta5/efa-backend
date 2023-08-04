@@ -1,14 +1,15 @@
 const express = require("express");
 const {
-	getCategories,
-	createProduct,
-	getProducts,
-	setStatusProduct,
-	productUpdate,
-	deleteProduct,
-	getProductsWithDiscount,
-	getProductsHome,
-	getProductsWithOutStock,
+    getCategories,
+    createProduct,
+    getProducts,
+    setStatusProduct,
+    productUpdate,
+    deleteProduct,
+    getProductsWithDiscount,
+    getProductsHome,
+    getProductsWithOutStock,
+    getProductsByFilter,
 } = require("../controllers/products");
 const uploadFile = require("../middlewares/uploadFile");
 const { validarJWT } = require("../middlewares/validarJWT");
@@ -32,5 +33,7 @@ router.get("/discount", getProductsWithDiscount);
 router.get("/home", getProductsHome);
 
 router.get("/outstock", getProductsWithOutStock);
+
+router.get("/get/filter", getProductsByFilter);
 
 module.exports = router;
