@@ -72,7 +72,6 @@ const createProduct = async (req, res = response) => {
 const getProducts = async (req, res = response) => {
     const { page, size, query, id, orderBy, section } = req.query;
 
-    console.log(section);
     try {
         if (id) {
             const product = await Product.findOne({
@@ -110,6 +109,8 @@ const getProducts = async (req, res = response) => {
             const term = query.trim().toLowerCase();
 
             const num = parseFloat(term);
+
+            console.log(orderBy);
 
             const products = await Product.findAndCountAll({
                 order: [(orderBy == 0 && [["price", "ASC"]]) || (orderBy == 1 && [["price", "ASC"]]) || (orderBy == 2 && [["price", "DESC"]])],
@@ -149,7 +150,7 @@ const getProducts = async (req, res = response) => {
                         {
                             price: { [Op.like]: "%" + num + "%" },
                         },
-                        {
+                        !isNaN(num) && {
                             profit: { [Op.eq]: num },
                         },
                     ],
@@ -420,11 +421,11 @@ const getProductsByFilter = async (req, res = response) => {
                         },
                     },
                 ],
-                [Op.and]: [
-                    {
-                        price: { [Op.between]: [price1, price2] },
-                    },
-                ],
+                // [Op.and]: [
+                //     {
+                //         price: { [Op.between]: [price1, price2] },
+                //     },
+                // ],
             },
         });
 

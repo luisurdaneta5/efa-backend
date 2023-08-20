@@ -6,7 +6,7 @@ const router = express.Router();
 
 router.post("/register", validarJWT, setRegisterEmailNotifications);
 
-router.get("/emails", validarJWT, getNotificationsEmails);
+router.get("/emails", getNotificationsEmails);
 
 router.delete("/delete", validarJWT, setDeleteNotificationsEmails);
 

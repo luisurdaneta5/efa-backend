@@ -10,6 +10,7 @@ const {
     getProductsHome,
     getProductsWithOutStock,
     getProductsByFilter,
+    getProductsByCategories,
 } = require("../controllers/products");
 const uploadFile = require("../middlewares/uploadFile");
 const { validarJWT } = require("../middlewares/validarJWT");

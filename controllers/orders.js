@@ -41,7 +41,7 @@ const createOrder = async (req, res = response) => {
                 address: body.address,
                 note: body.note,
                 total: body.amount,
-                sale_date: Date.now(),
+                sale_date: moment().format(),
                 discount: body.coupon == null ? 0 : body.coupon,
             };
             const order = new Order(data);
@@ -106,7 +106,7 @@ const createOrder = async (req, res = response) => {
                         id: uuidv4(),
                         productId: product.id,
                         cant: product.count,
-                        sale_date: Date.now(),
+                        sale_date: moment().format(),
                     };
                     const sale = new Sale(data);
                     sale.save();
@@ -336,7 +336,10 @@ const getOrdersPending = async (req, res = response) => {
     try {
         const orders = await Order.findAndCountAll({
             where: {
-                status: 0,
+                status: {
+                    [Op.not]: 3,
+                },
+
                 [Op.or]: [
                     {
                         id: {
