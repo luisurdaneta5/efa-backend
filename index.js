@@ -28,6 +28,9 @@ app.use("/uploads/products", express.static(path.join(__dirname, "/uploads/produ
 //acceso a banners
 app.use("/uploads/banners", express.static(path.join(__dirname, "/uploads/banners")));
 
+//acceso a banks
+app.use("/uploads/banks", express.static(path.join(__dirname, "/uploads/banks")));
+
 //Rutas
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/categories", require("./routes/categories"));

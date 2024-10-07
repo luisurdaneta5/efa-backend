@@ -1,6 +1,6 @@
 const { response } = require("express");
 const { v4: uuidv4 } = require("uuid");
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 const User = require("../models/user");
 const { generarJWT } = require("../helpers/jwt");
 const Balance = require("../models/balance");
@@ -72,7 +72,6 @@ const createUser = async (req, res = response) => {
 
 const setLogin = async (req, res = response) => {
     const body = req.body;
-    console.log(body);
 
     try {
         const user = await User.findOne({

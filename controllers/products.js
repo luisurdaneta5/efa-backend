@@ -110,8 +110,6 @@ const getProducts = async (req, res = response) => {
 
             const num = parseFloat(term);
 
-            console.log(orderBy);
-
             const products = await Product.findAndCountAll({
                 order: [(orderBy == 0 && [["price", "ASC"]]) || (orderBy == 1 && [["price", "ASC"]]) || (orderBy == 2 && [["price", "DESC"]])],
                 attributes: {
@@ -328,11 +326,13 @@ const getProductsWithDiscount = async (req, res = response) => {
 const getProductsHome = async (req, res = response) => {
     const { query } = req.query;
 
+    console.log("ENTREEE");
+
     const term = query.trim().toLowerCase();
     try {
         const products = await Product.findAll({
             attributes: {
-                exclude: ["status", "createdAt", "updatedAt", "cost", "profit"],
+                exclude: ["status", "createdAt", "updatedAt", "cost", "profit", "description"],
             },
             include: {
                 model: Review,
@@ -343,12 +343,16 @@ const getProductsHome = async (req, res = response) => {
             order: sequelize.random(),
             limit: 8,
             where: {
-                status: 1,
-                [Op.or]: [
+                [Op.and]: [
+                    { status: 1 },
                     {
-                        category: {
-                            [Op.like]: "%" + term + "%",
-                        },
+                        [Op.or]: [
+                            {
+                                category: {
+                                    [Op.like]: "%" + term + "%",
+                                },
+                            },
+                        ],
                     },
                 ],
             },
